@@ -3,40 +3,98 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Immigration in United States</title>
+        <title>Playing Around With the Web</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-        <link rel="stylesheet" href="css/normalize.css">
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" >
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="style.css">
         
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+		<script src="scripts/datamaps.world.min.js"></script>
+		<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+		
 		
     </head>
     
     <body>
-	    <!--Header for page-->
-	    <div id="page_head" class="header">
-		    	    <nav class="navbar navbar-default">
-			    	    <h1 id="title">Immigration in United States</h1>
-		    	    </nav>
+	    <svg></svg>
+	    <div class="bar_graph">
+		    <div id="chart"></div>
+		    <script>
+				var margin = {top: 20, right: 20, bottom: 30, left: 40},
+				width = 1400 - margin.left - margin.right,
+				height = 500 - margin.top - margin.bottom;
+				
+				var x0 = d3.scale.ordinal()
+				    		.rangeRoundBands([0, width], .1);
+				
+				var x1 = d3.scale.ordinal();
+				var y = d3.scale.linear()
+				        .range([height, 0]);
+				
+				var xAxis = d3.svg.axis()
+								.scale(x0)
+								.orient("bottom")
+				
+				var yAxis = d3.svg.axis()
+								.scale(y)
+								.orient("left")
+								.tickFormat(d3.format(".2s"));
+				
+				//Creating the canvas
+				var svg = d3.select("#chart")
+							.append("svg")
+						    .attr("width", width + margin.left + margin.right)
+						    .attr("height", height + margin.top + margin.bottom)
+						    .append("g")
+						    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+								
+				//Connecting the data
+				d3.csv("Bar.csv",function(error,data){ //Callback start
+						
+						color.domain(d3.keys(data[0]).filter(function (key) {
+							return key !== "Year";
+						}));
+						
+						data.forEach(function(d){
+								
+							}
+						)
+						
+					}//End of CallBack
+				);
+				
+				/*var changeOpacity = function(d){
+					//console.log(d.split(' ').join(''));
+					d3.selectAll('g rect')
+					  .style('opacity', 0.2);	
+					//console.log('#'+ d.split(" ").join(""))
+					
+				    d3.selectAll('#'+ d.split(" ").join(""))
+					  .style('opacity', 1);
+					  
+					d3.select("g").selectAll(".legend-box")
+						.style('opacity', 1);
+				}
+				
+				var tip= d3.tip()
+				        .attr('class', 'd3-tip')
+				        .offset([-10, 0])
+				        .html(function(d) {
+				            //console.log(d)
+				            return "<strong>Percentage:</strong> <span style='color:white'>" + d.value + "%</span> <br> <br>Category: " +d.name;
+				        })*/
+				
+
+				
+				//var color = d3.scale.ordinal()
+				//        .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"]);
+						    
+   
+		    </script>
 	    </div>
-	    
-	    <!--Main Content-->
-	    <div id="content" class="content">
-					<button class="btn btn-default" type="submit">Button</button>		    
-	    </div>
-	    
-	    <!--Footer-->
-	    <div id="footer" class="footer"></div>
-	    
-
-
-
-
-
     </body>
 </html>
