@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Playing Around With the Web</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="style.css">
+        
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+		<script src="scripts/datamaps.world.min.js"></script>
+		<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+		
+		
+    </head>
+    
+    <body>
+	    <div class="bar_graph">
+		    <script>
+			    //var d will be the csv source
+			    
+						    
+			    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+	            width = 1400 - margin.left - margin.right,
+	            height = 500 - margin.top - margin.bottom;
+			
+				var changeOpacity = function(d){
+					//console.log(d.split(' ').join(''));
+					d3.selectAll('g rect')
+					  .style('opacity', 0.2);	
+					//console.log('#'+ d.split(" ").join(""))
+					
+				    d3.selectAll('#'+ d.split(" ").join(""))
+					  .style('opacity', 1);
+					  
+					d3.select("g").selectAll(".legend-box")
+						.style('opacity', 1);
+				}
+			    var tip= d3.tip()
+			            .attr('class', 'd3-tip')
+			            .offset([-10, 0])
+			            .html(function(d) {
+			                //console.log(d)
+			                return "<strong>Percentage:</strong> <span style='color:white'>" + d.value + "%</span> <br> <br>Category: " +d.name;
+			
+			            })
+			
+			    var x0 = d3.scale.ordinal()
+			            .rangeRoundBands([0, width], .1);
+			
+			    var x1 = d3.scale.ordinal();
+			
+			    var y = d3.scale.linear()
+			            .range([height, 0]);
+			
+			    var color = d3.scale.ordinal()
+			            .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"]);
+			
+			    //"#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"
+			
+			    var xAxis = d3.svg.axis()
+			            .scale(x0)
+			            .orient("bottom");
+			
+			    var yAxis = d3.svg.axis()
+			            .scale(y)
+			            .orient("left")
+			            .tickFormat(d3.format(".2s"));
+			
+			
+			    var svg = d3.select("body").append("svg")
+			            .attr("width", 1450)
+			            .attr("height", height + margin.top + margin.bottom)
+			            .append("g")
+			            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+			    svg.call(tip);	    
+			    
+		        d3.csv("Bar.csv", function(error, data) {
+		        var countries = d3.keys(data[0]).filter(function(key) { return key !== "Year"; });
+		
+		        data.forEach(function(d) {
+		            d.country = countries.map(function(name) { return {name: name, value: +d[name]}; });
+		            d.total = countries.map(function(name) { 
+			            if (name === "total"){
+				            return {name: name, value: +d[name]}; 
+				            }
+			            });
+			        console.log(d.country.name);
+			        
+			        //console.log("Country: " + d.country[1].name + ", Count: " + d.country[1].value);
+
+		        });
+				
+		x0.domain(data.map(function(d) { return d.Year; }));
+        x1.domain(countries).rangeRoundBands([0, x0.rangeBand()]);
+        y.domain([0, d3.max(data, function(d) { return d3.max(d.country.value, function(d) { return d.country.value; }); })])
+
+
+        svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+        svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Percentage");
+
+        var Year = svg.selectAll(".Year")
+                .data(data)
+                .enter().append("g")
+                .attr("class", "g")
+                .attr("transform", function(d) { return "translate(" + x0(d.Year) + ",0)"; });
+
+        var draw = Year.selectAll("rect")
+                .data(function(d) {
+	                console.log(d);
+                    return d.total;
+                })
+                .enter()
+                .append("rect")
+	                .attr("width", x1.rangeBand())
+	                .attr("x", function(d) { return x1(d.name); })
+	                .attr("y", function(d) { return y(d.value); })
+	                .attr("height", function(d) { return height - y(d.value); })
+	                .style("fill", function(d) { return color(d.name); })
+	                .attr("id", function(d) { return d.name.split(' ').join(''); })
+	                .attr("class","bar")
+	                .on('mouseover', tip.show)
+	                .on('mouseout', tip.hide);
+				    
+				    console.log(data);
+				    
+			    });
+				
+			    
+/*			    var w = 800;
+				var h = 100;
+				var barPadding = 2;
+				
+				var svg = d3.select("body")
+		            .append("svg")
+		            .attr("width", w)	
+		            .attr("height", h);
+				
+				svg.selectAll("rect")
+				   .data(data)
+				   .enter()
+				   .append("rect")
+				   .attr("width", w / data.length - barPadding)
+				   .attr("y", function(data) {
+					    return h - data;  //Height minus data value
+					})
+				   .attr("width", 20)
+				   .attr("height", function(d) {
+					    return d;  //Just the data value
+					})
+					.attr("fill", "teal"); */
+   
+		    </script>
+	    </div>
+    </body>
+</html>
