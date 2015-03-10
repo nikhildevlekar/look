@@ -1,12 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Playing Around With the Web</title>
+        <title>U.S. Immigration Trend Analysis</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+		<script src="http://code.jquery.com/jquery-latest.js"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="style.css">
@@ -14,19 +15,62 @@
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
 		<script src="scripts/datamaps.world.min.js"></script>
+		<script src="scripts/d3pie.js"></script>
 		<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 		
 		
     </head>
     
     <body>
-	    <svg></svg>
+		<nav id="header" class="navbar navbar-inverse">
+		  <div class="container-fluid">
+		    <!-- Brand and toggle get grouped for better mobile display -->
+		    <div class="navbar-header">
+		      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+		        <span class="sr-only">Toggle navigation</span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		        <span class="icon-bar"></span>
+		      </button>
+		      <a class="navbar-brand" href="#">U.S. Immigration Trend Analysis</a>
+		    </div>
+		
+		    <!-- Collect the nav links, forms, and other content for toggling -->
+		    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+		      <ul id="navbar" class="nav navbar-nav">
+		        <li><a href="#">About</a></li>
+		        <li class="dropdown">
+		          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Country <span class="caret"></span></a>
+		          <ul id="country_list" class="dropdown-menu" role="menu">
+			          <li><a href="#" value="Total" onclick="getCountry(this);">Show All Countries</a></li>
+					  <li class="divider"></li>
+		          </ul>
+		        </li>
+		      </ul>
+		    </div><!-- /.navbar-collapse -->
+		  </div><!-- /.container-fluid -->
+		</nav>
+		<!--button type="button" class="btn btn-default" onclick="displayCountry()">Country</button-->
+	    <div id="chart"></div>
 	    <div class="bar_graph">
-		    <div id="chart"></div>
-		    <script>
+			<script>
+				
+				
+				var desh = "Total";
+				
+				//OnClick function to get selected country
+				function getCountry(country_name) {
+					desh = country_name.getAttribute("value");
+					console.log("Country = " + desh);
+					return false;
+				}
+				
+
+				//Script to create barGraph
 				var margin = {top: 20, right: 20, bottom: 30, left: 40},
-				width = 1400 - margin.left - margin.right,
-				height = 500 - margin.top - margin.bottom;
+				width = 800 - margin.left - margin.right,
+				height = 200 - margin.top - margin.bottom;
 				
 				var x0 = d3.scale.ordinal()
 				    		.rangeRoundBands([0, width], .1);
@@ -34,6 +78,7 @@
 				var x1 = d3.scale.ordinal();
 				var y = d3.scale.linear()
 				        .range([height, 0]);
+				
 				
 				var xAxis = d3.svg.axis()
 								.scale(x0)
@@ -44,57 +89,128 @@
 								.orient("left")
 								.tickFormat(d3.format(".2s"));
 				
+				
 				//Creating the canvas
 				var svg = d3.select("#chart")
 							.append("svg")
+							.attr("class","bar-graph")
 						    .attr("width", width + margin.left + margin.right)
 						    .attr("height", height + margin.top + margin.bottom)
 						    .append("g")
 						    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 								
 				//Connecting the data
-				d3.csv("Bar.csv",function(error,data){ //Callback start
-						
-						color.domain(d3.keys(data[0]).filter(function (key) {
-							return key !== "Year";
-						}));
-						
-						data.forEach(function(d){
-								
-							}
-						)
-						
-					}//End of CallBack
-				);
+				d3.csv("Bar.csv", update);
 				
-				/*var changeOpacity = function(d){
-					//console.log(d.split(' ').join(''));
-					d3.selectAll('g rect')
-					  .style('opacity', 0.2);	
-					//console.log('#'+ d.split(" ").join(""))
-					
-				    d3.selectAll('#'+ d.split(" ").join(""))
-					  .style('opacity', 1);
-					  
-					d3.select("g").selectAll(".legend-box")
-						.style('opacity', 1);
-				}
 				
-				var tip= d3.tip()
-				        .attr('class', 'd3-tip')
-				        .offset([-10, 0])
-				        .html(function(d) {
-				            //console.log(d)
-				            return "<strong>Percentage:</strong> <span style='color:white'>" + d.value + "%</span> <br> <br>Category: " +d.name;
-				        })*/
 				
+				function update(error,data){ //Function start
+						
+						//Getting list of countries
+					    var countries = d3.keys(data[0]).filter(function(key) { return key !== "Year" && key !== "Total" ; });
+						
+						//Function to populate the country drop down
+						function write_country_list(){
+						    var items = document.getElementById("country_list");
+							countries.forEach(function (name){
+								var item = document.createElement("li");
+								var link = document.createElement("a");
+								link.setAttribute("href", "#");
+								link.setAttribute("value",name);
+								link.setAttribute("onclick","getCountry(this);")
+						        link.innerHTML = name;
+						        item.appendChild(link);
+						        items.appendChild(item);
+							});    
+						}
 
-				
-				//var color = d3.scale.ordinal()
-				//        .range(["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"]);
-						    
-   
+						write_country_list(); //Executing that function
+
+					    data.forEach(function(d) {
+						        d.country_value = countries.map(function(x) { return {country: x, value: +d[x]}; });
+								d.year = d.Year;
+						});
+						
+						data.forEach(function(d) {		
+								d.total = +d.Total;
+						});
+						
+						
+						
+//						var abc = data.map(function(d) { 						
+//							return d.country_value.filter(function(obj) {
+//								if(obj.country == "India") {
+//									return obj;
+//								}
+//							});
+//						});
+						
+												
+						
+//						var filtered = data.map(function (e) {
+//							if (e.hasOwnProperty(desh)) {
+//		                        var obj = {};
+//		                        obj[desh] = e[desh];
+//		                        obj["year"] = e.year;
+//		                        return obj;
+//                    		}
+//                		});
+						
+																		
+						//Data Domain
+						x0.domain( data.map( function(d) { return d.year; } ) );
+						
+						if ( desh === "Total" ) {
+							yValue = function(d){ return d.total };
+						}
+						
+						console.log(yValue);
+						y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+						
+						//Creating the X-Axis
+						svg.append("g")
+					      .attr("class", "x axis")
+					      .attr("transform", "translate(0," + height + ")")
+					      .call(xAxis)
+					    .selectAll("text")
+					      .style("text-anchor", "end")
+					      .attr("dx", "-.8em")
+					      .attr("dy", "-.55em")
+					      .attr("transform", "rotate(-90)" );
+
+						//Creating the Y-Axis					      
+					    svg.append("g")
+					      .attr("class", "y axis")
+					      .call(yAxis)
+					    .append("text")
+					      .attr("transform", "rotate(-90)")
+					      .attr("y", 6)
+					      .attr("dy", ".71em")
+					      .style("text-anchor", "end")
+					      .text("Total");
+					      
+					    
+					    svg.selectAll("bar")
+					      .data(data)
+					    .enter().append("rect")
+					      .style("fill", "steelblue")
+					      .attr("x", function(d) { return x0(d.year); })
+					      .attr("width", x0.rangeBand())
+					      .attr("y", function(d) { return y(d.yValue); })
+					      .attr("height", function(d) { return height - y(yValue);});
+					    
+						console.log(data);
+						
+					    
+					    
+					    
+					}//End of CallBack
+
+
 		    </script>
+		    
 	    </div>
+
     </body>
 </html>
