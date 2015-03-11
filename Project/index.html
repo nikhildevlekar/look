@@ -7,11 +7,11 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<script src="http://code.jquery.com/jquery-latest.js"></script>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="style.css">
         
+        <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
 		<script src="scripts/datamaps.world.min.js"></script>
@@ -43,7 +43,7 @@
 		        <li class="dropdown">
 		          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Country <span class="caret"></span></a>
 		          <ul id="country_list" class="dropdown-menu" role="menu">
-			          <li><a href="#" value="Total" onclick="getCountry(this);">Show All Countries</a></li>
+			          <li><a href="#" id="Total" value="Total" onclick="getCountry(this);">Show All Countries</a></li>
 					  <li class="divider"></li>
 		          </ul>
 		        </li>
@@ -51,13 +51,13 @@
 		    </div><!-- /.navbar-collapse -->
 		  </div><!-- /.container-fluid -->
 		</nav>
+		
 		<!--button type="button" class="btn btn-default" onclick="displayCountry()">Country</button-->
 	    <div id="chart"></div>
 	    <div class="bar_graph">
-			<script>
-				
-				
+			<script>			
 				var desh = "Total";
+				
 				
 				//OnClick function to get selected country
 				function getCountry(country_name) {
@@ -98,7 +98,8 @@
 						    .attr("height", height + margin.top + margin.bottom)
 						    .append("g")
 						    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-								
+		
+				
 				//Connecting the data
 				d3.csv("Bar.csv", update);
 				
@@ -107,34 +108,53 @@
 				function update(error,data){ //Function start
 						
 						//Getting list of countries
-					    var countries = d3.keys(data[0]).filter(function(key) { return key !== "Year" && key !== "Total" ; });
+					    var countries = d3.keys(data[0]).filter(function(key) { return key !== "Year" && key !== "Total" ; });						
+
+						
 						
 						//Function to populate the country drop down
 						function write_country_list(){
-						    var items = document.getElementById("country_list");
+						    var items = document.getElementById('country_list');
 							countries.forEach(function (name){
 								var item = document.createElement("li");
 								var link = document.createElement("a");
 								link.setAttribute("href", "#");
 								link.setAttribute("value",name);
+								link.setAttribute("id", name)
 								link.setAttribute("onclick","getCountry(this);")
 						        link.innerHTML = name;
 						        item.appendChild(link);
-						        items.appendChild(item);
-							});    
-						}
+						        items.appendChild(item);  
+							});  
+						}	
+						write_country_list();
+						
+						
+						$("#Total").onClick(function(){
+							alert("HERE YE GOES!")
+						});
+						
+						/*$("#Total").onclick(function(){
+							console.log("THIS WORKED!")
+							var filtered = data.map(function  (e) {
+								if (e.hasOwnProperty(desh)) {
+			                        var obj = {};
+			                        obj[desh] = e[desh];
+			                        obj["year"] = e.year;
+			                        return obj;
+			                        
+	                    		}
+							});
+							console.log(filtered);
+							//update(filtered);
+						});*/
 
-						write_country_list(); //Executing that function
 
 					    data.forEach(function(d) {
 						        d.country_value = countries.map(function(x) { return {country: x, value: +d[x]}; });
-								d.year = d.Year;
-						});
-						
-						data.forEach(function(d) {		
+								d.year = d.Year;	
 								d.total = +d.Total;
 						});
-						
 						
 						
 //						var abc = data.map(function(d) { 						
@@ -147,15 +167,9 @@
 						
 												
 						
-//						var filtered = data.map(function (e) {
-//							if (e.hasOwnProperty(desh)) {
-//		                        var obj = {};
-//		                        obj[desh] = e[desh];
-//		                        obj["year"] = e.year;
-//		                        return obj;
-//                    		}
-//                		});
+
 						
+						//console.log(filtered);
 																		
 						//Data Domain
 						x0.domain( data.map( function(d) { return d.year; } ) );
@@ -164,7 +178,7 @@
 							yValue = function(d){ return d.total };
 						}
 						
-						console.log(yValue);
+						//console.log(yValue);
 						y.domain([0, d3.max(data, function(d) { return d.total; })]);
 
 						
@@ -197,8 +211,8 @@
 					      .style("fill", "steelblue")
 					      .attr("x", function(d) { return x0(d.year); })
 					      .attr("width", x0.rangeBand())
-					      .attr("y", function(d) { return y(d.yValue); })
-					      .attr("height", function(d) { return height - y(yValue);});
+					      .attr("y", function(d) { return y(d.total); })
+					      .attr("height", function(d) { return height - y(d.total);});
 					    
 						console.log(data);
 						
